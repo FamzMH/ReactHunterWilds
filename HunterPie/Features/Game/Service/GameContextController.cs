@@ -1,21 +1,13 @@
 ﻿using HunterPie.Core.Architecture.Events;
 using HunterPie.Core.Client;
-using HunterPie.Core.Client.Configuration.Enums;
-using HunterPie.Core.Domain.Enums;
-using HunterPie.Core.Domain.Mapper;
 using HunterPie.Core.Domain.Process.Events;
 using HunterPie.Core.Domain.Process.Service;
 using HunterPie.Core.Game;
 using HunterPie.Core.Observability.Logging;
 using HunterPie.Core.Utils;
-using HunterPie.Features.Backup.Services;
-using HunterPie.Features.Overlay.Services;
-using HunterPie.Features.Overlay.Widgets;
 using HunterPie.Features.Scan.Service;
-using HunterPie.Integrations.Discord.Factory;
-using HunterPie.Integrations.Discord.Service;
 using HunterPie.Integrations.Services;
-using HunterPie.Integrations.Services.Exceptions;
+using HunterPie.ReactHunter.Nancy;
 using System;
 using System.Threading;
 using System.Windows;
@@ -36,18 +28,25 @@ internal class GameContextController(
     private readonly ILogger _logger = LoggerFactory.Create();
 
     private bool _isDisposed;
-    private Context? _context;
-    private readonly Dispatcher _uiDispatcher = uiDispatcher;
-    private readonly IProcessWatcherService _processWatcherService = processWatcherService;
-    private readonly IGameContextService _gameContextService = gameContextService;
-    private readonly IBackupService _backupService = backupService;
-    private readonly IControllableScanService _controllableScanService = controllableScanService;
-    private readonly DiscordPresenceFactory _discordPresenceFactory = discordPresenceFactory;
-    private readonly OverlayManager _overlayManager = overlayManager;
-    private readonly WidgetInitializers _widgetInitializers = widgetInitializers;
+    private Core.Game.Context? _context;
+    private readonly Dispatcher _uiDispatcher;
+    private readonly IProcessWatcherService _processWatcherService;
+    private readonly IGameContextService _gameContextService;
+    private readonly IControllableScanService _controllableScanService;
 
     private CancellationTokenSource? _cancellationTokenSource;
-    private DiscordPresenceService? _discordPresenceService;
+
+    public GameContextController(
+        Dispatcher uiDispatcher,
+        IProcessWatcherService processWatcherService,
+        IGameContextService gameContextService,
+        IControllableScanService controllableScanService)
+    {
+        _uiDispatcher = uiDispatcher;
+        _processWatcherService = processWatcherService;
+        _gameContextService = gameContextService;
+        _controllableScanService = controllableScanService;
+    }
 
     public void Subscribe()
     {
@@ -62,30 +61,14 @@ internal class GameContextController(
 
         _logger.Debug("Initialized game context");
 
-
         await _logger.CatchAndLogAsync(async () =>
         {
-            await _uiDispatcher.InvokeAsync(() => _overlayManager.Setup(_context));
-
-            await ContextInitializers.InitializeAsync(_context);
-
-            await _uiDispatcher.InvokeAsync(() => _widgetInitializers.InitializeAsync(_context));
-
             _controllableScanService.Start(_cancellationTokenSource.Token);
-        });
 
-        _logger.CatchAndLog(() =>
-        {
-            _discordPresenceService = _discordPresenceFactory.Create(_context);
-            _discordPresenceService.Start();
-        });
+            ReactHunter.Singletons.Context.HunterPieContext = _context;
 
-        await _logger.CatchAndLogAsync(async () =>
-        {
-            await _backupService.ExecuteAsync(
-                gameType: MapFactory.Map<GameProcessType, GameType?>(e.Game.Type)
-                          ?? throw new UnsupportedGameException(e.Game.Name)
-            );
+            Console.WriteLine("Initialising nancy");
+            NancyInitialiser.InitialiseNancy();
         });
     }
 
@@ -94,14 +77,9 @@ internal class GameContextController(
         if (_cancellationTokenSource is { })
             await _cancellationTokenSource.CancelAsync();
 
-        _discordPresenceService?.Dispose();
-
         _context?.Dispose();
 
         _context = null;
-
-        await _uiDispatcher.InvokeAsync(_widgetInitializers.Unload);
-        await _uiDispatcher.InvokeAsync(_overlayManager.Dispose);
 
         _logger.Info("Process has closed");
 

@@ -67,7 +67,6 @@ internal class GameContextController(
 
             ReactHunter.Singletons.Context.HunterPieContext = _context;
 
-            Console.WriteLine("Initialising nancy");
             NancyInitialiser.InitialiseNancy();
         });
     }

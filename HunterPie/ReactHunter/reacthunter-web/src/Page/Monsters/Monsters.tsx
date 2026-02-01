@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout, Progress, Divider, Icon, Row, Col, Collapse, Card, Button } from 'antd';
+import { Progress, Icon, Row, Col, Collapse, Card } from 'antd';
 import '../Main.css'
 import Main from "../Main";
 import {getSeconds, processMinutes} from "../Timer/Timer";
@@ -15,7 +15,7 @@ export function getMonsters(main: Main) {
     }
 
     const monsterData = main.state.apiData.monsters as Array<any>;
-    const preData = main.state.preApiData.monsters as Array<any>;
+    const timeLeft = main.state.apiData.timeLeft as number;
 
     main.activeMonsterIndex = getActiveMonsterIndex(monsterData);
     if (main.activeMonsterIndex >= 0) {
@@ -45,7 +45,7 @@ export function getMonsters(main: Main) {
                     style={{height: index == main.activeMonsterIndex ? main.getStyle().teamHeight - 20 : main.getStyle().teamHeight - 25}}>
                     <div style={{display: "flex"}}>
                         <span
-                            style={fontStyle}>{monster.name} ({Math.round(monster.health)}/{Math.round(monster.maxHealth)}) {getMonsterCrown(monster)} {getCapturable(monster)}</span>
+                            style={fontStyle}>{monster.name} ({Math.round(monster.health)}/{Math.round(monster.maxHealth)}) {showCrown(monster)} {showCapturable(monster)}</span>
                         <div style={{flexGrow: 1, textAlign: "right"}}>
                             <span style={{
                                 color: "white",
@@ -76,9 +76,9 @@ export function getMonsters(main: Main) {
 
     return (
         <div>
-            {/*<span style={{ color: "white", fontWeight: "bold", fontSize: "20px", position: "relative", zIndex: 9999 }}>*/}
-            {/*    {main.isInQuest ? "Quest timer: " + processMinutes(main.secondsElapsed) + ":" + getSeconds(main.secondsElapsed) : ""}*/}
-            {/*</span>*/}
+            <span style={{ color: "white", fontWeight: "bold", fontSize: "20px", position: "relative", zIndex: 9999 }}>
+                {timeLeft > 0 ? "Quest timer: " + processMinutes(timeLeft) + ":" + getSeconds(timeLeft) : ""}
+            </span>
             <Collapse accordion activeKey={String(main.activeMonsterIndex)}>
                 {monsterRender}
             </Collapse>
@@ -92,7 +92,7 @@ function getActiveMonsterIndex(monsterData: Array<any>): number {
     });
 }
 
-function getMonsterCrown(data: any) {
+function showCrown(data: any) {
     if (data.crown == 1) {
         return (<Icon type="trophy" theme="twoTone" twoToneColor="darkgray" />)
     }
@@ -104,35 +104,47 @@ function getMonsterCrown(data: any) {
     }
 }
 
-function isCapturable(monster: any) {
-    const captureHealth = monster.captureThreshold * monster.maxHealth;
-    return monster.health < captureHealth;
-}
-
-function getCapturable(monster: any) {
+function showCapturable(monster: any) {
     if (isCapturable(monster)) {
         return (<Icon type="copyright" theme="twoTone" twoToneColor={CapturableColour} />)
     }
 }
 
-function getAilments(data: any) {
-    if (!data) {
+function isCapturable(monster: any) {
+    const captureHealth = monster.captureThreshold * monster.maxHealth;
+    return monster.health < captureHealth;
+}
+
+function getAilments(ailments: any) {
+    if (!ailments) {
         return null
     }
 
-    return data.map((ailment: any, index: number) => {
-        if (ailment.buildUp > 0) {
+    return ailments.map((ailment: any, index: number) => {
+        if (ailment.buildUp > 0 || ailment.timer > 0) {
             const ailmentBuildupFraction = ailment.buildUp / ailment.maxBuildUp;
             const ailmentTimerFraction = ailment.timer / ailment.maxTimer;
 
             let friendlyName = ailment.id.replace("AILMENT_", "");
             friendlyName = friendlyName[0].toUpperCase() + friendlyName.substr(1).toLowerCase();
 
+            // @ts-ignore
+            let format = null;
+            if (ailment.buildUp === ailment.maxBuildUp) {
+                format = <span style={{color: "white"}}>{Math.floor(ailment.timer)}s</span>
+            } else {
+                format = <span style={{color: "white"}}>{Math.floor(ailmentBuildupFraction * 100)}%</span>
+            }
+
             return (
                 <Card.Grid key={index} style={{ padding: 5 }}>
                     <div>{friendlyName}</div>
-                    <Progress strokeColor="rgb(255, 157, 255)" percent={ailmentBuildupFraction * 100} showInfo={false} />
-                    <Progress strokeColor="#8fa7ff" percent={ailmentTimerFraction * 100} showInfo={false} />
+                    <Progress
+                        strokeColor={ailment.buildUp === ailment.maxBuildUp ? "rgb(240, 29, 177)" : "rgb(29, 135, 240)"}
+                        percent={ailment.buildUp === ailment.maxBuildUp ? ailmentTimerFraction * 100 : ailmentBuildupFraction * 100}
+                        // @ts-ignore
+                        format={_ => (format)}
+                    />
                 </Card.Grid>);
         }
         else {
@@ -151,6 +163,11 @@ function getMonsterParts(monster: any) {
             partHealthFraction = part.health / part.maxHealth;
         } else if (part.maxSever > 0) {
             partHealthFraction = part.sever / part.maxSever;
+            if (partHealthFraction == 1) {
+                // When a severable part is already severed HunterPie
+                // returns its health as 100%.
+                return null;
+            }
         } else {
             return null;
         }
@@ -159,14 +176,15 @@ function getMonsterParts(monster: any) {
         friendlyName = friendlyName[0].toUpperCase() + friendlyName.substr(1).toLowerCase();
 
         return (
-            <Col key={monster.name + part.id} span={6} style={{textAlign: "center"}}>
+            <Col key={part.id} span={6} style={{textAlign: "center"}}>
                 <div>{timesBrokenCount === 0 ? friendlyName : friendlyName + ": " + timesBrokenCount}</div>
                 <Progress
                     type="circle"
                     percent={partHealthFraction * 100}
                     width={65}
-                    format={_percent => (
-                        <span style={{color: "white"}}>{Math.floor(partHealthFraction * 100)}%</span>)}
+                    format={percent => (
+                        // @ts-ignore
+                        <span style={{color: "white"}}>{Math.floor(percent)}%</span>)}
                 />
             </Col>
         );

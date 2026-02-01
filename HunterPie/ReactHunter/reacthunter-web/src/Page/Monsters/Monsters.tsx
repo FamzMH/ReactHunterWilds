@@ -9,35 +9,23 @@ const CapturableColour = "#BF40BF";
 
 export const MonsterBarColor = '#108ee9';
 
-function getMonsterParts(monster: any) {
-    return monster.parts.map((part: any) => {
-        let timesBrokenCount = part.count;
-        let partHealthFraction = part.health / part.maxHealth;
-
-        return (
-            <Col key={monster.id + part.name} span={6} style={{textAlign: "center"}}>
-                <div>{timesBrokenCount === 0 ? part.name : part.name + ": " + timesBrokenCount}</div>
-                <Progress
-                    type="circle"
-                    percent={partHealthFraction * 100}
-                    width={65}
-                    format={_percent => (
-                        <span style={{color: "white"}}>{Math.floor(partHealthFraction * 100)}%</span>)}
-                />
-            </Col>
-        );
-    });
-}
-
 export function getMonsters(main: Main) {
     if (!main.state.apiData || !main.state.apiData.monsters) {
         return null;
     }
 
     const monsterData = main.state.apiData.monsters as Array<any>;
-    const previousMonsterData = main.state.preApiData.monsters as Array<any>;
+    const preData = main.state.preApiData.monsters as Array<any>;
 
-    main.activeMonsterIndex = getActiveMonsterIndex(previousMonsterData, monsterData);
+    main.activeMonsterIndex = getActiveMonsterIndex(monsterData);
+    if (main.activeMonsterIndex >= 0) {
+        let activeMonster = monsterData[main.activeMonsterIndex];
+
+        // Push active monster to front of monsterData
+        monsterData.splice(main.activeMonsterIndex, 1);
+        monsterData.unshift(activeMonster);
+        main.activeMonsterIndex = 0;
+    }
 
     const monsterRender = monsterData.map((monster: any, index: number) => {
         let fontStyle: any = {
@@ -57,7 +45,7 @@ export function getMonsters(main: Main) {
                     style={{height: index == main.activeMonsterIndex ? main.getStyle().teamHeight - 20 : main.getStyle().teamHeight - 25}}>
                     <div style={{display: "flex"}}>
                         <span
-                            style={fontStyle}>{monster.name} ({Math.round(monster.health)}/{monster.maxHealth}) {getMonsterCrown(monster)} {getCapturable(monster)}</span>
+                            style={fontStyle}>{monster.name} ({Math.round(monster.health)}/{Math.round(monster.maxHealth)}) {getMonsterCrown(monster)} {getCapturable(monster)}</span>
                         <div style={{flexGrow: 1, textAlign: "right"}}>
                             <span style={{
                                 color: "white",
@@ -88,9 +76,9 @@ export function getMonsters(main: Main) {
 
     return (
         <div>
-            <span style={{ color: "white", fontWeight: "bold", fontSize: "20px", position: "relative", zIndex: 9999 }}>
-                {main.isInQuest ? "Quest timer: " + processMinutes(main.secondsElapsed) + ":" + getSeconds(main.secondsElapsed) : ""}
-            </span>
+            {/*<span style={{ color: "white", fontWeight: "bold", fontSize: "20px", position: "relative", zIndex: 9999 }}>*/}
+            {/*    {main.isInQuest ? "Quest timer: " + processMinutes(main.secondsElapsed) + ":" + getSeconds(main.secondsElapsed) : ""}*/}
+            {/*</span>*/}
             <Collapse accordion activeKey={String(main.activeMonsterIndex)}>
                 {monsterRender}
             </Collapse>
@@ -98,36 +86,10 @@ export function getMonsters(main: Main) {
     )
 }
 
-function getActiveMonsterIndex(previousMonsterData: Array<any>, monsterData: Array<any>): number {
-    let activeMonsterIndex = 0;
-
-    if (previousMonsterData?.length == monsterData?.length &&
-        previousMonsterData.every((monster: any, i: number) => monsterData[i].name == monster.name)) {
-        // The monster with the biggest health difference since
-        // the last update is probably the current target.
-        let activeMonsterHealthDifference = 0;
-
-        previousMonsterData.forEach((previousMonster: any, index: number) => {
-            const monsterHealthDifference = previousMonster.health - monsterData[index].health;
-            if (monsterHealthDifference > activeMonsterHealthDifference) {
-                activeMonsterHealthDifference = monsterHealthDifference;
-                activeMonsterIndex = index;
-            }
-        });
-    } else {
-        // The monster with the lowest health fraction is probably the target.
-        let lowestHealthFraction = 2;
-
-        monsterData.forEach((monster: any, index: number) => {
-            const fraction = monster.health / monster.maxHealth;
-            if (fraction < lowestHealthFraction && fraction > 0) {
-                lowestHealthFraction = fraction;
-                activeMonsterIndex = index;
-            }
-        });
-    }
-
-    return activeMonsterIndex;
+function getActiveMonsterIndex(monsterData: Array<any>): number {
+    return monsterData.findIndex((monster: any, _: number) => {
+       return monster.target == 1;
+    });
 }
 
 function getMonsterCrown(data: any) {
@@ -143,7 +105,8 @@ function getMonsterCrown(data: any) {
 }
 
 function isCapturable(monster: any) {
-    return monster.health < monster.captureThreshold;
+    const captureHealth = monster.captureThreshold * monster.maxHealth;
+    return monster.health < captureHealth;
 }
 
 function getCapturable(monster: any) {
@@ -162,9 +125,12 @@ function getAilments(data: any) {
             const ailmentBuildupFraction = ailment.buildUp / ailment.maxBuildUp;
             const ailmentTimerFraction = ailment.timer / ailment.maxTimer;
 
+            let friendlyName = ailment.id.replace("AILMENT_", "");
+            friendlyName = friendlyName[0].toUpperCase() + friendlyName.substr(1).toLowerCase();
+
             return (
                 <Card.Grid key={index} style={{ padding: 5 }}>
-                    <div>{ailment.definition.string}</div>
+                    <div>{friendlyName}</div>
                     <Progress strokeColor="rgb(255, 157, 255)" percent={ailmentBuildupFraction * 100} showInfo={false} />
                     <Progress strokeColor="#8fa7ff" percent={ailmentTimerFraction * 100} showInfo={false} />
                 </Card.Grid>);
@@ -172,5 +138,37 @@ function getAilments(data: any) {
         else {
             return null;
         }
+    });
+}
+
+function getMonsterParts(monster: any) {
+    return monster.parts.map((part: any) => {
+        let timesBrokenCount = 0;
+        let partHealthFraction = 0;
+
+        if (part.maxHealth > 0) {
+            timesBrokenCount = part.count;
+            partHealthFraction = part.health / part.maxHealth;
+        } else if (part.maxSever > 0) {
+            partHealthFraction = part.sever / part.maxSever;
+        } else {
+            return null;
+        }
+
+        let friendlyName = part.id.replace("PART_", "");
+        friendlyName = friendlyName[0].toUpperCase() + friendlyName.substr(1).toLowerCase();
+
+        return (
+            <Col key={monster.name + part.id} span={6} style={{textAlign: "center"}}>
+                <div>{timesBrokenCount === 0 ? friendlyName : friendlyName + ": " + timesBrokenCount}</div>
+                <Progress
+                    type="circle"
+                    percent={partHealthFraction * 100}
+                    width={65}
+                    format={_percent => (
+                        <span style={{color: "white"}}>{Math.floor(partHealthFraction * 100)}%</span>)}
+                />
+            </Col>
+        );
     });
 }

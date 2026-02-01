@@ -86,8 +86,7 @@ internal class GameContextController(
         SmartEventsTracker.DisposeEvents();
         ContextInitializers.Dispose();
 
-        if (ClientConfig.Config.Client.ShouldShutdownOnGameExit)
-            _uiDispatcher.Invoke(Application.Current.Shutdown);
+        Application.Current.Shutdown();
     }
 
     public void Dispose()

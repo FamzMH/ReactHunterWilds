@@ -16,7 +16,6 @@ interface IProps {
 
 interface IState {
     apiData: any;
-    preApiData: any;
     zoomLevel: number;
     imagePath: string;
     imageHash: any
@@ -32,6 +31,15 @@ interface IZoomStyle {
     seHeight: number;
 }
 
+// TODO:
+// - Load localizations from .xml file
+// - Implement and cleanup team and player widgets
+// - Cleaner style for ailments: "build up" and "timer" text with clearer colours
+// - Red circle around last part hit
+// - Fix background not long enough
+// - Rename to React Hunter Wilds everywhere
+// - Run as admin automatically
+
 export default class Main extends React.Component<IProps, IState>{
     Interval: NodeJS.Timeout | undefined;
     SEInterval: NodeJS.Timeout | undefined;
@@ -40,13 +48,11 @@ export default class Main extends React.Component<IProps, IState>{
     lastUpdateTime: number;
     isInQuest: boolean;
     currentlyActiveStatusEffects: string[];
-    questStartTime: number;
     secondsElapsed: number;
     constructor(props: IProps) {
         super(props);
         this.state = {
             apiData: {},
-            preApiData: {},
             zoomLevel: 1,
             imagePath: "../../public/background.jpeg",
             imageHash: Date.now()
@@ -57,7 +63,6 @@ export default class Main extends React.Component<IProps, IState>{
         this.isInQuest = false;
         // Keeps track of whether React Hunter is currently showing any active status effects
         this.currentlyActiveStatusEffects = [];
-        this.questStartTime = 0;
         this.secondsElapsed = 0;
         this.zoomStyle = [
             {
@@ -133,7 +138,6 @@ export default class Main extends React.Component<IProps, IState>{
         if (r.isSuccess) {
             this.setState({
                 apiData: r.data,
-                preApiData: this.state.apiData
             });
 
             if (this.state.apiData.monsters.length > 0) {

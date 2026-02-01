@@ -86,6 +86,8 @@
 
   <ItemGroup>
     <PackageReference Include="DiscordRichPresence" Version="1.0.175" />
+    <PackageReference Include="Nancy" Version="2.0.0" />
+    <PackageReference Include="Nancy.Hosting.Self" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -115,6 +117,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
   </ItemGroup>
 
@@ -327,6 +334,10 @@
     <None Update="Game\World\Data\MonsterData.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -343,7 +354,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy &quot;$(SolutionDir)Localization\localization\*.xml&quot; &quot;$(TargetDir)Languages\&quot; /D /E /I /F /Y&#xD;&#xA;del &quot;$(TargetDir)*.pdb&quot; /q&#xD;&#xA;del &quot;$(TargetDir)ref&quot; /q&#xD;&#xA;rmdir &quot;$(TargetDir)ref&quot;&#xD;&#xA;del &quot;$(TargetDir)*.dev.json&quot; /q&#xD;&#xA;echo &quot;Post-build event executed&quot;" />
+    <Exec Command="xcopy &quot;$(SolutionDir)Localization\localization\*.xml&quot; &quot;$(TargetDir)Languages\&quot; /D /E /I /F /Y&#xD;&#xA;del &quot;$(TargetDir)*.pdb&quot; /q&#xD;&#xA;del &quot;$(TargetDir)ref&quot; /q&#xD;&#xA;rmdir &quot;$(TargetDir)ref&quot;&#xD;&#xA;del &quot;$(TargetDir)*.dev.json&quot; /q&#xD;&#xA;&#xD;&#xA;xcopy $(SolutionDir)\HunterPie\ReactHunter\reacthunter-web\build $(TargetDir)Web /E /Y /I&#xD;&#xA;&#xD;&#xA;echo &quot;Post-build event executed&quot;" />
   </Target>
 
   <ProjectExtensions>
@@ -351,5 +362,9 @@
 		  <UserProperties BuildVersion_BuildVersioningStyle="None.None.None.Increment" BuildVersion_DetectChanges="False" BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" />
 	  </VisualStudio>
   </ProjectExtensions>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="cd $(SolutionDir)\HunterPie\ReactHunter\reacthunter-web&#xD;&#xA;npm run build" />
+  </Target>
 
 </Project>

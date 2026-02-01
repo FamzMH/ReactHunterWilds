@@ -4,9 +4,11 @@ using HunterPie.Core.Domain.Dialog;
 using HunterPie.Core.Observability.Logging;
 using HunterPie.DI;
 using HunterPie.Features.Debug.Mocks;
+using HunterPie.Features.Game.Service;
 using HunterPie.Internal;
 using HunterPie.Internal.Tray;
 using HunterPie.Platforms;
+using HunterPie.ReactHunter.Forms;
 using HunterPie.UI.Main.Views;
 using HunterPie.Usecases;
 using System;
@@ -116,21 +118,14 @@ public partial class App : Application
 
     private async void InitializeMainView()
     {
-        _logger.Info("Initializing HunterPie client UI");
+        await MainApplication.Start();
 
-        bool shouldStart = await MainApplication.Start();
-
-        if (!shouldStart)
-            return;
-
-        MainWindow = Window;
-
-        SetupTrayIcon();
-
-        if (ClientConfig.Config.Client.EnableSeamlessStartup)
-            return;
-
-        Window.Show();
+        var form = new Form1(Current);
+        var wih = new WindowInteropHelper(Window)
+        {
+            Owner = form.Handle
+        };
+        form.ShowDialog();
     }
 
     private void CheckForRunningInstances()

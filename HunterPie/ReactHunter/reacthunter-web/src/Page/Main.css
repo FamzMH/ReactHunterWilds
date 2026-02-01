@@ -1,0 +1,30 @@
+.ant-collapse-content > .ant-collapse-content-box{
+    padding:0px !important;
+}
+
+.ant-collapse-content {
+	background-color:transparent
+}
+
+.ant-collapse {
+	background-color: transparent;
+}
+
+.ant-card-grid {
+	box-shadow: 0px 0px #000000;
+	-webkit-box-shadow: 0px 0px #000000;
+}
+
+.ant-card-grid-hoverable {
+	box-shadow: 0px 0px #000000;
+	-webkit-box-shadow: 0px 0px #000000;
+}
+
+.ant-card-grid-hoverable:hover {
+	box-shadow: 0px 0px #000000;
+	-webkit-box-shadow: 0px 0px #000000;
+}
+
+div {
+	color: white;
+}

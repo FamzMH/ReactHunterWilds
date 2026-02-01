@@ -23,6 +23,12 @@ public class MHWController : NancyModule
 
             IReadOnlyCollection<IMonster> monsters = context.Game.Monsters;
 
+            int timeLeft = 0;
+            if (context.Game.Quest != null)
+            {
+                timeLeft = (int)context.Game.Quest.TimeLeft.TotalSeconds;
+            }
+            
             var jsonSettings = new JsonSerializerSettings
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
@@ -35,6 +41,7 @@ public class MHWController : NancyModule
                 data = new
                 {
                     monsters,
+                    timeLeft,
                 }
             }, jsonSettings);
                 

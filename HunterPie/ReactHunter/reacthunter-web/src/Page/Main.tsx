@@ -332,10 +332,10 @@ export default class Main extends React.Component<IProps, IState>{
                         </div>
                         <Row>
                             <Col lg={12} style={{ padding: 10 }}>
-                                <Divider orientation="right" style={{ color: 'white' }}>Monster</Divider>
+                                <Divider orientation="right" style={{ color: 'white' }}>Monsters</Divider>
                                 <div>
                                         {getMonsters(this)}
-                                    </div>
+                                </div>
                             </Col>
                             {/*<Col lg={12} style={{ padding: 10 }}>*/}
                             {/*    <Divider orientation="right" style={{ color: 'white' }}>Team Damage</Divider>*/}

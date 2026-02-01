@@ -3,13 +3,9 @@ using HunterPie.Core.Client;
 using HunterPie.Core.Domain.Process.Internal;
 using HunterPie.Core.Observability.Logging;
 using HunterPie.Core.Utils;
-using HunterPie.Features.Account.Config;
 using HunterPie.Features.Account.UseCase;
 using HunterPie.Features.Analytics.Entity;
 using HunterPie.Features.Game.Service;
-using HunterPie.Internal;
-using HunterPie.UI.Main.Navigators;
-using HunterPie.Update.UseCase;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -20,42 +16,25 @@ internal class MainApplication : IDisposable
 {
     private readonly ILogger _logger = LoggerFactory.Create();
     private readonly IAnalyticsService _analyticsService;
-    private readonly IUpdateUseCase _updateUseCase;
     private readonly IRemoteAccountConfigUseCase _remoteAccountConfigUseCase;
     private readonly IControllableWatcherService _controllableWatcherService;
-    private readonly RemoteConfigSyncService _remoteConfigSyncService;
-    private readonly NavigatorController _navigatorController;
     private readonly GameContextController _gameContextController;
 
     public MainApplication(
         IAnalyticsService analyticsService,
-        IUpdateUseCase updateUseCase,
         IRemoteAccountConfigUseCase remoteAccountConfigUseCase,
-        RemoteConfigSyncService remoteConfigSyncService,
-        NavigatorController navigatorController,
         GameContextController gameContextController,
         IControllableWatcherService controllableWatcherService)
     {
         _analyticsService = analyticsService;
-        _updateUseCase = updateUseCase;
         _remoteAccountConfigUseCase = remoteAccountConfigUseCase;
-        _remoteConfigSyncService = remoteConfigSyncService;
-        _navigatorController = navigatorController;
         _gameContextController = gameContextController;
         _controllableWatcherService = controllableWatcherService;
     }
 
     public async Task<bool> Start()
     {
-#if RELEASE
-        bool hasUpdated = await SelfUpdate();
-
-        if (hasUpdated)
-            return false;
-#endif
         _gameContextController.Subscribe();
-        _remoteConfigSyncService.Start();
-        await _navigatorController.SetupAsync();
         _controllableWatcherService.Start();
 
         return true;
@@ -76,19 +55,6 @@ internal class MainApplication : IDisposable
 
         string executablePath = typeof(MainApplication).Assembly.Location.Replace(".dll", ".exe");
         Process.Start(executablePath);
-    }
-
-    private async Task<bool> SelfUpdate()
-    {
-        bool hasUpdated = await _updateUseCase.InvokeAsync();
-
-        if (!hasUpdated)
-            return false;
-
-        InitializerManager.Unload();
-        await Restart();
-
-        return true;
     }
 
     public void Dispose()

@@ -66,6 +66,9 @@
     <Compile Update="Features\Backup\Views\BackupsView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="ReactHunter\Forms\Form1.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="UI\SideBar\ViewModels\HomeSideBarViewModel.cs">
       <SubType>Code</SubType>
     </Compile>

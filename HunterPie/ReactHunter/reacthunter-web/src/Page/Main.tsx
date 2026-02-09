@@ -3,7 +3,7 @@ import { Layout, Progress, Divider, Icon, Row, Col, Collapse, Card, Button } fro
 import * as Api from './MainService';
 import './Main.css'
 import Config from '../Config';
-import {getMonsters, MonsterBarColor} from './Monsters/Monsters';
+import {getTarget, MonsterBarColor} from './Monsters/Monsters';
 import {getMinutes, getSeconds} from "./Timer/Timer";
 
 const { Content } = Layout;
@@ -32,18 +32,16 @@ interface IZoomStyle {
 }
 
 // TODO:
-// - Load localizations from .xml file
 // - Implement and cleanup team and player widgets
-// - Cleaner style for ailments: "build up" and "timer" text with clearer colours
-// - Red circle around last part hit
 // - Fix background not long enough
 // - Rename to React Hunter Wilds everywhere
-// - Run as admin automatically
+// - Disable World and Rise support
+// - Make UI in WPF instead of WinForms
+// - Remove what we can from MainApplication.OnStartup
 
 export default class Main extends React.Component<IProps, IState>{
     Interval: NodeJS.Timeout | undefined;
     SEInterval: NodeJS.Timeout | undefined;
-    activeMonsterIndex: number;
     zoomStyle: Array<IZoomStyle>;
     lastUpdateTime: number;
     isInQuest: boolean;
@@ -57,7 +55,6 @@ export default class Main extends React.Component<IProps, IState>{
             imagePath: "../../public/background.jpeg",
             imageHash: Date.now()
         }
-        this.activeMonsterIndex = 0;
         // Tracks the last time data was pushed successfully from Smart Hunter
         this.lastUpdateTime = 0;
         this.isInQuest = false;
@@ -139,10 +136,6 @@ export default class Main extends React.Component<IProps, IState>{
             this.setState({
                 apiData: r.data,
             });
-
-            if (this.state.apiData.monsters.length > 0) {
-                this.lastUpdateTime = Date.now();
-            }
         } else {
             console.log(JSON.parse(r.data));
         }
@@ -336,9 +329,9 @@ export default class Main extends React.Component<IProps, IState>{
                         </div>
                         <Row>
                             <Col lg={12} style={{ padding: 10 }}>
-                                <Divider orientation="right" style={{ color: 'white' }}>Monsters</Divider>
+                                <Divider orientation="right" style={{ color: 'white' }}>Target</Divider>
                                 <div>
-                                        {getMonsters(this)}
+                                        {getTarget(this)}
                                 </div>
                             </Col>
                             {/*<Col lg={12} style={{ padding: 10 }}>*/}

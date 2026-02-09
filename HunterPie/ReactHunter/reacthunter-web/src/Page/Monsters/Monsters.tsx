@@ -1,5 +1,5 @@
 import React from 'react';
-import { Progress, Icon, Row, Col, Collapse, Card } from 'antd';
+import {Progress, Icon, Row, Col, Collapse, Card, List} from 'antd';
 import '../Main.css'
 import Main from "../Main";
 import {getSeconds, processMinutes} from "../Timer/Timer";
@@ -7,89 +7,68 @@ import {getSeconds, processMinutes} from "../Timer/Timer";
 const { Panel } = Collapse;
 const CapturableColour = "#BF40BF";
 
+const flinch = 2;
+const breakable = 4;
+const severable = 8;
+
 export const MonsterBarColor = '#108ee9';
 
-export function getMonsters(main: Main) {
-    if (!main.state.apiData || !main.state.apiData.monsters) {
+export function getTarget(main: Main) {
+    if (!main.state.apiData || !main.state.apiData.target) {
         return null;
     }
 
-    const monsterData = main.state.apiData.monsters as Array<any>;
+    const target = main.state.apiData.target as any;
     const timeLeft = main.state.apiData.timeLeft as number;
+    const localizations = main.state.apiData.localizations as { [p: string]: string; };
 
-    main.activeMonsterIndex = getActiveMonsterIndex(monsterData);
-    if (main.activeMonsterIndex >= 0) {
-        let activeMonster = monsterData[main.activeMonsterIndex];
-
-        // Push active monster to front of monsterData
-        monsterData.splice(main.activeMonsterIndex, 1);
-        monsterData.unshift(activeMonster);
-        main.activeMonsterIndex = 0;
+    let fontStyle: any = {
+        fontWeight: "bold",
+        fontSize: main.getStyle().activeMonsterFontSize
     }
 
-    const monsterRender = monsterData.map((monster: any, index: number) => {
-        let fontStyle: any = {
-            fontWeight: "bold",
-            fontSize: main.getStyle().defaultFontSize
-        }
-
-        if (index == main.activeMonsterIndex) {
-            fontStyle.fontSize = main.getStyle().activeMonsterFontSize;
-        }
-
-        const monsterHealthFraction = monster.health / monster.maxHealth;
-
-        return (
-            <Panel showArrow={false} key={String(index)} header={(
-                <div
-                    style={{height: index == main.activeMonsterIndex ? main.getStyle().teamHeight - 20 : main.getStyle().teamHeight - 25}}>
-                    <div style={{display: "flex"}}>
-                        <span
-                            style={fontStyle}>{monster.name} ({Math.round(monster.health)}/{Math.round(monster.maxHealth)}) {showCrown(monster)} {showCapturable(monster)}</span>
-                        <div style={{flexGrow: 1, textAlign: "right"}}>
-                            <span style={{
-                                color: "white",
-                                fontWeight: "bold",
-                                fontSize: main.getStyle().defaultFontSize
-                            }}>{Math.round(monsterHealthFraction * 100)}%</span>
-                        </div>
-
-                    </div>
-                    <Progress
-                        strokeWidth={index == main.activeMonsterIndex ? main.getStyle().activeProgressWidth : main.getStyle().defaultProgressWidth}
-                        status="active"
-                        strokeColor={index == main.activeMonsterIndex ? (isCapturable(monster) ? CapturableColour : "red") : MonsterBarColor}
-                        percent={monsterHealthFraction * 100}
-                        showInfo={false}
-                    />
-                </div>
-            )}>
-                <Row>
-                    <Col span={24}>{getAilments(monster.ailments)}</Col>
-                    <Col span={24} style={{height: 10}}></Col>
-                    {getMonsterParts(monster)}
-                </Row>
-                <div style={{height: "10px"}}></div>
-            </Panel>
-        )
-    });
+    const targetHealthFraction = target.health / target.maxHealth;
 
     return (
         <div>
             <span style={{ color: "white", fontWeight: "bold", fontSize: "20px", position: "relative", zIndex: 9999 }}>
                 {timeLeft > 0 ? "Quest timer: " + processMinutes(timeLeft) + ":" + getSeconds(timeLeft) : ""}
             </span>
-            <Collapse accordion activeKey={String(main.activeMonsterIndex)}>
-                {monsterRender}
+            <Collapse accordion activeKey={String(target.name)}>
+                <Panel showArrow={false} key={target.name} header={(
+                    <div
+                        style={{height: main.getStyle().teamHeight - 20}}>
+                        <div style={{display: "flex"}}>
+                        <span
+                            style={fontStyle}>{target.name} ({Math.round(target.health)}/{Math.round(target.maxHealth)}) {showCrown(target)} {showCapturable(target)}</span>
+                            <div style={{flexGrow: 1, textAlign: "right"}}>
+                            <span style={{
+                                color: "white",
+                                fontWeight: "bold",
+                                fontSize: main.getStyle().defaultFontSize
+                            }}>{Math.round(targetHealthFraction * 100)}%</span>
+                            </div>
+
+                        </div>
+                        <Progress
+                            strokeWidth={main.getStyle().activeProgressWidth}
+                            status="active"
+                            strokeColor={isCapturable(target) ? CapturableColour : "red"}
+                            percent={targetHealthFraction * 100}
+                            showInfo={false}
+                        />
+                    </div>
+                )}>
+                    <Row>
+                        <Col span={24}>{getAilments(target.ailments, localizations)}</Col>
+                        <Col span={24} style={{height: 10}}></Col>
+                        {getMonsterParts(target, localizations)}
+                    </Row>
+                    <div style={{height: "10px"}}></div>
+                </Panel>
             </Collapse>
         </div>
     )
-}
-
-function getActiveMonsterIndex(monsterData: Array<any>): number {
-    return monsterData.findIndex((monster: any, _: number) => {
-       return monster.target == 1;
-    });
 }
 
 function showCrown(data: any) {
@@ -115,35 +94,43 @@ function isCapturable(monster: any) {
     return monster.health < captureHealth;
 }
 
-function getAilments(ailments: any) {
+function getAilments(ailments: any, localizations: { [p: string]: string; }) {
     if (!ailments) {
         return null
     }
 
-    return ailments.map((ailment: any, index: number) => {
-        if (ailment.buildUp > 0 || ailment.timer > 0) {
-            const ailmentBuildupFraction = ailment.buildUp / ailment.maxBuildUp;
-            const ailmentTimerFraction = ailment.timer / ailment.maxTimer;
+    return ailments.map((ailment: any) => {
+        if (ailment) {
+            if (!(ailment.timer > 0 || ailment.buildUp > 0)) {
+                return null
+            }
 
-            let friendlyName = ailment.id.replace("AILMENT_", "");
-            friendlyName = friendlyName[0].toUpperCase() + friendlyName.substr(1).toLowerCase();
+            if (!ailment.id.startsWith("AILMENT_") || ailment.id.toUpperCase() === "AILMENT_UNKNOWN") {
+                return null
+            }
 
-            // @ts-ignore
-            let format = null;
-            if (ailment.buildUp === ailment.maxBuildUp) {
+            let friendlyName = localizations[ailment.id.toLowerCase()];
+
+            let percent: number;
+            let format: {} | null | undefined = null;
+            let strokeColor: string;
+            if (ailment.timer > 0) {
+                percent = (ailment.timer / ailment.maxTimer) * 100;
                 format = <span style={{color: "white"}}>{Math.floor(ailment.timer)}s</span>
+                strokeColor = CapturableColour
             } else {
-                format = <span style={{color: "white"}}>{Math.floor(ailmentBuildupFraction * 100)}%</span>
+                percent = (ailment.buildUp / ailment.maxBuildUp) * 100;
+                format = <span style={{color: "white"}}>{Math.floor(percent)}%</span>
+                strokeColor = MonsterBarColor
             }
 
             return (
-                <Card.Grid key={index} style={{ padding: 5 }}>
+                <Card.Grid key={ailment.id} style={{ padding: 5 }}>
                     <div>{friendlyName}</div>
                     <Progress
-                        strokeColor={ailment.buildUp === ailment.maxBuildUp ? "rgb(240, 29, 177)" : "rgb(29, 135, 240)"}
-                        percent={ailment.buildUp === ailment.maxBuildUp ? ailmentTimerFraction * 100 : ailmentBuildupFraction * 100}
-                        // @ts-ignore
+                        percent={percent}
                         format={_ => (format)}
+                        strokeColor={strokeColor}
                     />
                 </Card.Grid>);
         }
@@ -153,27 +140,48 @@ function getAilments(ailments: any) {
     });
 }
 
-function getMonsterParts(monster: any) {
+function getMonsterParts(monster: any, localizations: { [p: string]: string; }) {
+    // Keep track of part IDs that are already rendered.
+    // Some parts have a separate "part" just for flinch
+    // values, unsure why.
+    let seen: string[] = [];
+
+    // Sort breakable and severable parts before flinch parts
+    monster.parts.sort((a: { type: number; }, b: { type: number; }) => {
+        return b.type - a.type;
+    })
+
     return monster.parts.map((part: any) => {
+        if (!part.id.startsWith("PART_") || part.id.toUpperCase() === "PART_UNKNOWN") {
+            return null
+        }
+
         let timesBrokenCount = 0;
         let partHealthFraction = 0;
 
-        if (part.maxHealth > 0) {
+        if (part.type === breakable) {
             timesBrokenCount = part.count;
             partHealthFraction = part.health / part.maxHealth;
-        } else if (part.maxSever > 0) {
+        } else if (part.type === severable) {
             partHealthFraction = part.sever / part.maxSever;
             if (partHealthFraction == 1) {
                 // When a severable part is already severed HunterPie
                 // returns its health as 100%.
                 return null;
             }
+        } else if (part.type === flinch && !seen.includes(part.id)) {
+            partHealthFraction = part.flinch / part.maxFlinch;
         } else {
             return null;
         }
 
-        let friendlyName = part.id.replace("PART_", "");
-        friendlyName = friendlyName[0].toUpperCase() + friendlyName.substr(1).toLowerCase();
+        if (!(partHealthFraction > 0)) {
+            return null;
+        }
+
+        seen.push(part.id);
+
+        let friendlyName = localizations[part.id.toLowerCase()];
 
         return (
             <Col key={part.id} span={6} style={{textAlign: "center"}}>

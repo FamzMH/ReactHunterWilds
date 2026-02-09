@@ -3,8 +3,9 @@ import { Layout, Progress, Divider, Icon, Row, Col, Collapse, Card, Button } fro
 import * as Api from './MainService';
 import './Main.css'
 import Config from '../Config';
-import {getTarget, MonsterBarColor} from './Monsters/Monsters';
+import {getTarget, MonsterBarColor} from './Target/Target';
 import {getMinutes, getSeconds} from "./Timer/Timer";
+import {getTeam} from "./Team/Team";
 
 const { Content } = Layout;
 
@@ -32,7 +33,7 @@ interface IZoomStyle {
 }
 
 // TODO:
-// - Implement and cleanup team and player widgets
+// - Implement and cleanup player widget
 // - Fix background not long enough
 // - Rename to React Hunter Wilds everywhere
 // - Disable World and Rise support
@@ -175,48 +176,7 @@ export default class Main extends React.Component<IProps, IState>{
     }
 
     render() {
-        let getTeam = () => {
-            if (!this.state.apiData || !this.state.apiData.players) {
-                return null;
-            }
-            var data = this.state.apiData.players;
-            var teamDamage = 0;
-            var _tempDamage = 0;
-            var _tempIndex = 0;
-            data.forEach((m: any, index: number) => {
-                if (m.damage > _tempDamage) {
-                    _tempDamage = m.damage;
-                    _tempIndex = index;
-                }
-                teamDamage += m.damage;
-            });
-            return data.map((p: any, index: number) => {
-                if (p.name == "未知玩家") {
-                    return null;
-                }
-                else {
-                    return (
-                        <div key={p.name} style={{ height: this.getStyle().teamHeight }}>
-                            <div style={{ display: "flex" }}>
-                                <div>
-                                    <span style={{ fontWeight: "bold", fontSize: this.getStyle().defaultFontSize }}>{p.name} {p.damage}</span>
-                                    {index == _tempIndex ? (<Icon style={{ color: "red", marginLeft: 10, fontSize: this.getStyle().activeTeamIconSize }} type="chrome" spin={true} />) : null}
-                                </div>
-                                <div style={{ flexGrow: 1, textAlign: "right" }}>
-                                    <span style={{ color: "white", fontWeight: "bold", fontSize: this.getStyle().defaultFontSize }}>{teamDamage === 0 ? 0 : Math.round((p.damage / teamDamage) * 100)}%</span>
-                                </div>
-                            </div>
-                            <Progress
-                                strokeWidth={this.getStyle().defaultProgressWidth}
-                                strokeColor={MonsterBarColor}
-                                percent={teamDamage === 0 ? 0 : (p.damage / teamDamage) * 100}
-                                showInfo={false}
-                            />
-                        </div>
-                    )
-                }
-            });
-        }
+
 
         let getPlayer = () => {
             if (!this.state.apiData || !this.state.apiData.player) {
@@ -334,11 +294,12 @@ export default class Main extends React.Component<IProps, IState>{
                                         {getTarget(this)}
                                 </div>
                             </Col>
-                            {/*<Col lg={12} style={{ padding: 10 }}>*/}
-                            {/*    <Divider orientation="right" style={{ color: 'white' }}>Team Damage</Divider>*/}
-                            {/*    <div>*/}
-                            {/*            {getTeam()}*/}
-                            {/*        </div>*/}
+                            <Col lg={12} style={{ padding: 10 }}>
+                                <Divider orientation="right" style={{ color: 'white' }}>Team Damage</Divider>
+                                <div>
+                                        {getTeam(this)}
+                                    </div>
+                            </Col>
                             {/*    <Divider orientation="right" style={{ color: 'white' }}>Status Effects</Divider>*/}
                             {/*    <div>*/}
                             {/*            {getPlayer()}*/}

@@ -1,6 +1,7 @@
 ﻿using HunterPie.Core.Client.Localization;
 using HunterPie.Core.Game;
 using HunterPie.Core.Game.Entity.Enemy;
+using HunterPie.Core.Game.Entity.Party;
 using HunterPie.DI;
 using HunterPie.Features.Languages.Repository;
 using HunterPie.Integrations.Datasources.MonsterHunterWilds.Entity.Enemy;
@@ -27,6 +28,7 @@ public class MHWildsController : NancyModule
         Get("/get", x => {
             IContext context = Singletons.Context.HunterPieContext;
 
+            // TODO: Can we use context.Game.TargetDetectionService.Target?
             IMonster target = GetTarget(context);
             Dictionary<string, string>? localizations = null;
 
@@ -40,6 +42,8 @@ public class MHWildsController : NancyModule
             {
                 timeLeft = (int)context.Game.Quest.TimeLeft.TotalSeconds;
             }
+
+            IReadOnlyCollection<IPartyMember> players = context.Game.Player.Party.Members;
             
             var jsonSettings = new JsonSerializerSettings
             {
@@ -55,6 +59,7 @@ public class MHWildsController : NancyModule
                     target,
                     timeLeft,
                     localizations,
+                    players,
                 }
             }, jsonSettings);
                 

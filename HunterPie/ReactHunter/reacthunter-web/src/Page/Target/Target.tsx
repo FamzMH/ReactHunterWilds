@@ -1,15 +1,17 @@
 import React from 'react';
-import {Progress, Icon, Row, Col, Collapse, Card, List} from 'antd';
+import {Progress, Icon, Row, Col, Collapse, Card} from 'antd';
 import '../Main.css'
 import Main from "../Main";
 import {getSeconds, processMinutes} from "../Timer/Timer";
 
 const { Panel } = Collapse;
-const CapturableColour = "#BF40BF";
+export const CapturableColour = '#bf40bf';
 
-const flinch = 2;
-const breakable = 4;
-const severable = 8;
+enum PartType {
+    Flinch = 1 << 1,
+    Breakable = 1 << 2,
+    Severable = 1 << 3
+}
 
 export const MonsterBarColor = '#108ee9';
 
@@ -20,7 +22,7 @@ export function getTarget(main: Main) {
 
     const target = main.state.apiData.target as any;
     const timeLeft = main.state.apiData.timeLeft as number;
-    const localizations = main.state.apiData.localizations as { [p: string]: string; };
+    const targetLocalizations = main.state.apiData.localizations.target as { [p: string]: string; };
 
     let fontStyle: any = {
         fontWeight: "bold",
@@ -60,9 +62,9 @@ export function getTarget(main: Main) {
                     </div>
                 )}>
                     <Row>
-                        <Col span={24}>{getAilments(target.ailments, localizations)}</Col>
+                        <Col span={24}>{getAilments(target.ailments, targetLocalizations)}</Col>
                         <Col span={24} style={{height: 10}}></Col>
-                        {getMonsterParts(target, localizations)}
+                        {getMonsterParts(target, targetLocalizations)}
                     </Row>
                     <div style={{height: "10px"}}></div>
                 </Panel>
@@ -159,17 +161,17 @@ function getMonsterParts(monster: any, localizations: { [p: string]: string; }) 
         let timesBrokenCount = 0;
         let partHealthFraction = 0;
 
-        if (part.type === breakable) {
+        if (part.type === PartType.Breakable) {
             timesBrokenCount = part.count;
             partHealthFraction = part.health / part.maxHealth;
-        } else if (part.type === severable) {
+        } else if (part.type === PartType.Severable) {
             partHealthFraction = part.sever / part.maxSever;
             if (partHealthFraction == 1) {
                 // When a severable part is already severed HunterPie
                 // returns its health as 100%.
                 return null;
             }
-        } else if (part.type === flinch && !seen.includes(part.id)) {
+        } else if (part.type === PartType.Flinch && !seen.includes(part.id)) {
             partHealthFraction = part.flinch / part.maxFlinch;
         } else {
             return null;

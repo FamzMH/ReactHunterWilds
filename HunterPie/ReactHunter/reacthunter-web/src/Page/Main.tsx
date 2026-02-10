@@ -1,19 +1,18 @@
 import React from 'react';
-import { Layout, Progress, Divider, Icon, Row, Col, Collapse, Card, Button } from 'antd';
+import { Layout, Divider, Row, Col, Button } from 'antd';
 import * as Api from './MainService';
 import './Main.css'
 import Config from '../Config';
-import {getTarget, MonsterBarColor} from './Target/Target';
+import {getTarget} from './Target/Target';
 import {getMinutes, getSeconds} from "./Timer/Timer";
 import {getTeam} from "./Team/Team";
+import {getAbnormalities} from "./Player/Player";
 
 const { Content } = Layout;
 
 const ButtonGroup = Button.Group;
 
-interface IProps {
-
-}
+interface IProps {}
 
 interface IState {
     apiData: any;
@@ -29,25 +28,22 @@ interface IZoomStyle {
     defaultProgressWidth: number;
     activeProgressWidth: number;
     teamHeight: number;
-    seHeight: number;
+    abnormalityHeight: number;
 }
 
 // TODO:
 // - Implement and cleanup player widget
 // - Fix background not long enough
 // - Rename to React Hunter Wilds everywhere
-// - Disable World and Rise support
+// - Check World and Rise support
+// - Refactor to React HunterPie
 // - Make UI in WPF instead of WinForms
 // - Remove what we can from MainApplication.OnStartup
+// - Update NPM modules
 
 export default class Main extends React.Component<IProps, IState>{
     Interval: NodeJS.Timeout | undefined;
-    SEInterval: NodeJS.Timeout | undefined;
     zoomStyle: Array<IZoomStyle>;
-    lastUpdateTime: number;
-    isInQuest: boolean;
-    currentlyActiveStatusEffects: string[];
-    secondsElapsed: number;
     constructor(props: IProps) {
         super(props);
         this.state = {
@@ -56,12 +52,6 @@ export default class Main extends React.Component<IProps, IState>{
             imagePath: "../../public/background.jpeg",
             imageHash: Date.now()
         }
-        // Tracks the last time data was pushed successfully from Smart Hunter
-        this.lastUpdateTime = 0;
-        this.isInQuest = false;
-        // Keeps track of whether React Hunter is currently showing any active status effects
-        this.currentlyActiveStatusEffects = [];
-        this.secondsElapsed = 0;
         this.zoomStyle = [
             {
                 defaultFontSize: 10,
@@ -70,7 +60,7 @@ export default class Main extends React.Component<IProps, IState>{
                 defaultProgressWidth: 8,
                 activeProgressWidth: 8,
                 teamHeight: 50,
-                seHeight: 25
+                abnormalityHeight: 25
             },
             {
                 defaultFontSize: 14,
@@ -79,7 +69,7 @@ export default class Main extends React.Component<IProps, IState>{
                 defaultProgressWidth: 10,
                 activeProgressWidth: 10,
                 teamHeight: 60,
-                seHeight: 30
+                abnormalityHeight: 30
             },
             {
                 defaultFontSize: 18,
@@ -88,7 +78,7 @@ export default class Main extends React.Component<IProps, IState>{
                 defaultProgressWidth: 12,
                 activeProgressWidth: 12,
                 teamHeight: 70,
-                seHeight: 35
+                abnormalityHeight: 35
             },
             {
                 defaultFontSize: 22,
@@ -97,7 +87,7 @@ export default class Main extends React.Component<IProps, IState>{
                 defaultProgressWidth: 16,
                 activeProgressWidth: 16,
                 teamHeight: 80,
-                seHeight: 40
+                abnormalityHeight: 40
             },
             {
                 defaultFontSize: 26,
@@ -106,7 +96,7 @@ export default class Main extends React.Component<IProps, IState>{
                 defaultProgressWidth: 20,
                 activeProgressWidth: 20,
                 teamHeight: 90,
-                seHeight: 45
+                abnormalityHeight: 45
             }
         ];
     }
@@ -115,15 +105,10 @@ export default class Main extends React.Component<IProps, IState>{
         this.Interval = setInterval(() => {
             this.doInterval();
         }, 500);
-
-        // this.SEInterval = setInterval(() => {
-        //     this.doSEInterval();
-        // }, 1000);
     }
 
     componentWillUnmount() {
         clearInterval(this.Interval!);
-        // clearInterval(this.SEInterval!);
     }
 
     doInterval = async () => {
@@ -142,112 +127,11 @@ export default class Main extends React.Component<IProps, IState>{
         }
     }
 
-    // doSEInterval = async () => {
-    //     var currentTime = Date.now();
-    //     if ((currentTime - this.lastUpdateTime) / 1000 > 1) {
-    //         // More than 1 second has elapsed (i.e. more than 2 rerenders or "API updates") since the last time lastUpdateTime was updated so we assume the player is not in a quest
-    //         // Therefore, we reset state for timers and status effects
-    //         this.isInQuest = false;
-    //         this.lastUpdateTime = 0;
-    //         if (this.currentlyActiveStatusEffects.length !== 0) {
-    //             this.currentlyActiveStatusEffects = [];
-    //             // Player has left the quest, but they still have active status effects so we need to force a rerender by setting the state to reset the timers
-    //             this.setState({
-    //                 apiData: this.state.apiData,
-    //                 preApiData: this.state.preApiData,
-    //             })
-    //         }
-    //         if (this.questStartTime !== 0) {
-    //             this.questStartTime = 0;
-    //             this.secondsElapsed = 0;
-    //         }
-    //     } else {
-    //         if (this.questStartTime === 0) {
-    //             this.questStartTime = Date.now();
-    //         } else {
-    //             this.secondsElapsed = Math.round((Date.now() - this.questStartTime) / 1000);
-    //         }
-    //         this.isInQuest = true;
-    //     }
-    // }
-
     getStyle = () => {
         return this.zoomStyle[this.state.zoomLevel];
     }
 
     render() {
-
-
-        let getPlayer = () => {
-            if (!this.state.apiData || !this.state.apiData.player) {
-                return null;
-            }
-            var data = this.state.apiData.player
-            return data.map((se: any, index: number) => {
-                var isMantle = se.name.includes("Mantle");
-                if (!this.isInQuest) {
-                    if (this.currentlyActiveStatusEffects.includes(se.name)) this.currentlyActiveStatusEffects.splice(this.currentlyActiveStatusEffects.indexOf(se.name), 1);
-                    return null;
-                }
-                if (!se.isVisible) {
-                    if (this.currentlyActiveStatusEffects.includes(se.name)) this.currentlyActiveStatusEffects.splice(this.currentlyActiveStatusEffects.indexOf(se.name), 1);
-                    return null;
-                } else {
-                    this.currentlyActiveStatusEffects.push(se.name);
-                }
-                // To handle status effects like Mega Demondrug
-                if (se.time === null) {
-                    return (
-                        <div key={se.name} style={{ height: this.getStyle().seHeight }}>
-                            <div style={{ display: "flex" }}>
-                                <div>
-                                    <span style={{ fontWeight: "bold", fontSize: this.getStyle().defaultFontSize }}>{se.name}</span>
-                                </div>
-                            </div>
-                        </div>
-                    );
-
-                }
-                else if (Math.round(se.time.current) <= 1) {
-                    if (this.currentlyActiveStatusEffects.includes(se.name)) this.currentlyActiveStatusEffects.splice(this.currentlyActiveStatusEffects.indexOf(se.name), 1);
-                    return null;
-                }
-                else if (se.groupId === "Debuff") {
-                    return (
-                        <div key={se.name} style={{ height: this.getStyle().seHeight }}>
-                            <div style={{ display: "flex" }}>
-                                <div>
-                                    <span style={{ color: "red", fontWeight: "bold", fontSize: this.getStyle().defaultFontSize }}>{se.name + " " + getMinutes(Math.round(se.time.current)) + ":" + getSeconds(Math.round(se.time.current))}</span>
-                                </div>
-                            </div>
-                        </div>
-                    );
-
-                } else if (isMantle) {
-                    return (
-                        <div key={se.name} style={{ height: this.getStyle().seHeight }}>
-                            <div style={{ display: "flex" }}>
-                                <div>
-                                    <span style={{ color: "gold", fontWeight: "bold", fontSize: this.getStyle().defaultFontSize }}>{se.name + " " + getMinutes(Math.round(se.time.current)) + ":" + getSeconds(Math.round(se.time.current))}</span>
-                                </div>
-                            </div>
-                        </div>
-                    );
-
-                } else {
-                    return (
-                        <div key={se.name} style={{ height: this.getStyle().seHeight }}>
-                            <div style={{ display: "flex" }}>
-                                <div>
-                                    <span style={{ color: "white", fontWeight: "bold", fontSize: this.getStyle().defaultFontSize }}>{se.name + " " + getMinutes(Math.round(se.time.current)) + ":" + getSeconds(Math.round(se.time.current))}</span>
-                                </div>
-                            </div>
-                        </div>
-                    );
-                }
-            });
-        }
-
         let onZoomChange = (isZoomIn: boolean) => {
             if (isZoomIn) {
                 if (this.state.zoomLevel >= this.zoomStyle.length - 1) {
@@ -298,13 +182,12 @@ export default class Main extends React.Component<IProps, IState>{
                                 <Divider orientation="right" style={{ color: 'white' }}>Team Damage</Divider>
                                 <div>
                                         {getTeam(this)}
-                                    </div>
+                                </div>
+                                <Divider orientation="right" style={{ color: 'white' }}>Abnormalities</Divider>
+                                <div>
+                                        {getAbnormalities(this)}
+                                </div>
                             </Col>
-                            {/*    <Divider orientation="right" style={{ color: 'white' }}>Status Effects</Divider>*/}
-                            {/*    <div>*/}
-                            {/*            {getPlayer()}*/}
-                            {/*        </div>*/}
-                            {/*</Col>*/}
                         </Row>
                         <Row>
                             <Col lg={12} style={{ padding: 10 }}></Col>

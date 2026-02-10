@@ -40,6 +40,7 @@ interface IZoomStyle {
 // - Make UI in WPF instead of WinForms
 // - Remove what we can from MainApplication.OnStartup
 // - Update NPM modules
+// - Try to use specialised tool name converter in C# again
 
 export default class Main extends React.Component<IProps, IState>{
     Interval: NodeJS.Timeout | undefined;

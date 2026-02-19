@@ -9,7 +9,7 @@
     <Deterministic>true</Deterministic>
     <ApplicationIcon>Resources\Icon.ico</ApplicationIcon>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <Authors>Haato</Authors>
+    <Authors>Haato, FamzMH</Authors>
     <DebugType>full</DebugType>
     <SignAssembly>True</SignAssembly>
     <PlatformTarget>AnyCPU</PlatformTarget>

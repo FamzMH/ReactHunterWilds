@@ -18,6 +18,6 @@ internal static class NancyInitialiser
         var host = new NancyHost(config, new Uri(APIHost));
         host.Start();
         
-        Console.WriteLine("React Hunter Wilds ready at: " + APIHost);
+        Console.WriteLine("React Hunter Returns ready at: " + APIHost);
     }
 }

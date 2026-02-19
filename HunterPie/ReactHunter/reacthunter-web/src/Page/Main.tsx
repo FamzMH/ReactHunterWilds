@@ -32,11 +32,8 @@ interface IZoomStyle {
 }
 
 // TODO:
-// - Implement and cleanup player widget
-// - Fix background not long enough
-// - Rename to React Hunter Wilds everywhere
-// - Check World and Rise support
-// - Refactor to React HunterPie
+// - Check Rise support
+// - Refactor to React Hunter Returns
 // - Make UI in WPF instead of WinForms
 // - Remove what we can from MainApplication.OnStartup
 // - Update NPM modules

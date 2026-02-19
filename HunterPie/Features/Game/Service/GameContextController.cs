@@ -5,7 +5,11 @@ using HunterPie.Core.Domain.Process.Service;
 using HunterPie.Core.Game;
 using HunterPie.Core.Observability.Logging;
 using HunterPie.Core.Utils;
+using HunterPie.Features.Backup.Services;
+using HunterPie.Features.Overlay.Services;
+using HunterPie.Features.Overlay.Widgets;
 using HunterPie.Features.Scan.Service;
+using HunterPie.Integrations.Discord.Factory;
 using HunterPie.Integrations.Services;
 using HunterPie.ReactHunter.Nancy;
 using System;
@@ -16,37 +20,19 @@ using System.Windows.Threading;
 namespace HunterPie.Features.Game.Service;
 
 internal class GameContextController(
-    Dispatcher uiDispatcher,
     IProcessWatcherService processWatcherService,
     IGameContextService gameContextService,
-    IBackupService backupService,
-    IControllableScanService controllableScanService,
-    DiscordPresenceFactory discordPresenceFactory,
-    OverlayManager overlayManager,
-    WidgetInitializers widgetInitializers) : IDisposable
+    IControllableScanService controllableScanService) : IDisposable
 {
     private readonly ILogger _logger = LoggerFactory.Create();
 
     private bool _isDisposed;
-    private Core.Game.Context? _context;
-    private readonly Dispatcher _uiDispatcher;
-    private readonly IProcessWatcherService _processWatcherService;
-    private readonly IGameContextService _gameContextService;
-    private readonly IControllableScanService _controllableScanService;
+    private Context? _context;
+    private readonly IProcessWatcherService _processWatcherService = processWatcherService;
+    private readonly IGameContextService _gameContextService = gameContextService;
+    private readonly IControllableScanService _controllableScanService = controllableScanService;
 
     private CancellationTokenSource? _cancellationTokenSource;
-
-    public GameContextController(
-        Dispatcher uiDispatcher,
-        IProcessWatcherService processWatcherService,
-        IGameContextService gameContextService,
-        IControllableScanService controllableScanService)
-    {
-        _uiDispatcher = uiDispatcher;
-        _processWatcherService = processWatcherService;
-        _gameContextService = gameContextService;
-        _controllableScanService = controllableScanService;
-    }
 
     public void Subscribe()
     {

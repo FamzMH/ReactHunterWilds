@@ -27,7 +27,7 @@ public class MHWildsController : NancyModule
 {
 
     private static ILocalizationRepository LocalizationRepository =>
-    DependencyContainer.Get<ILocalizationRepository>();
+        DependencyContainer.Get<ILocalizationRepository>();
 
     public MHWildsController()
     {

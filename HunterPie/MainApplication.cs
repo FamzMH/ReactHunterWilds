@@ -14,20 +14,16 @@ namespace HunterPie;
 
 internal class MainApplication(
     IAnalyticsService analyticsService,
-    IUpdateUseCase updateUseCase,
     IRemoteAccountConfigUseCase remoteAccountConfigUseCase,
-    RemoteConfigSyncService remoteConfigSyncService,
-    NavigatorController navigatorController,
     GameContextController gameContextController,
-    AccountController accountController,
     IControllableWatcherService controllableWatcherService) : IDisposable
 {
     private readonly ILogger _logger = LoggerFactory.Create();
 
     public async Task<bool> Start()
     {
-        _gameContextController.Subscribe();
-        _controllableWatcherService.Start();
+        gameContextController.Subscribe();
+        controllableWatcherService.Start();
 
         return true;
     }

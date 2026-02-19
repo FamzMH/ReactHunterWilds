@@ -7,7 +7,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <StartupObject></StartupObject>
     <Deterministic>true</Deterministic>
-    <ApplicationIcon>Resources\Icon.ico</ApplicationIcon>
+    <ApplicationIcon>ReactHunter\reacthunter-web\public\favicon.ico</ApplicationIcon>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Authors>Haato, FamzMH</Authors>
     <DebugType>full</DebugType>
@@ -63,6 +63,10 @@
   <ItemGroup>
     <Page Remove="Themes\Default\Template.xaml" />
     <Page Remove="Themes\Minimal\MonsterWidget.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="ReactHunter\reacthunter-web\public\favicon.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -355,7 +359,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy &quot;$(SolutionDir)Localization\localization\*.xml&quot; &quot;$(TargetDir)Languages\&quot; /D /E /I /F /Y&#xD;&#xA;del &quot;$(TargetDir)*.pdb&quot; /q&#xD;&#xA;del &quot;$(TargetDir)ref&quot; /q&#xD;&#xA;rmdir &quot;$(TargetDir)ref&quot;&#xD;&#xA;del &quot;$(TargetDir)*.dev.json&quot; /q&#xD;&#xA;&#xD;&#xA;xcopy $(SolutionDir)\HunterPie\ReactHunter\reacthunter-web\build $(TargetDir)Web /E /Y /I&#xD;&#xA;&#xD;&#xA;echo &quot;Post-build event executed&quot;" />
+    <Exec Command="xcopy &quot;$(SolutionDir)Localization\localization\*.xml&quot; &quot;$(TargetDir)Languages\&quot; /D /E /I /F /Y&#xD;&#xA;del &quot;$(TargetDir)*.pdb&quot; /q&#xD;&#xA;del &quot;$(TargetDir)ref&quot; /q&#xD;&#xA;rmdir &quot;$(TargetDir)ref&quot;&#xD;&#xA;del &quot;$(TargetDir)*.dev.json&quot; /q&#xD;&#xA;&#xD;&#xA;xcopy $(SolutionDir)\HunterPie\ReactHunter\reacthunter-web\build $(TargetDir)Web /E /Y /I&#xD;&#xA;&#xD;&#xA;ren $(TargetPath) &quot;$(TargetDir)React Hunter Returns.exe&quot; /Y&#xA;&#xD;&#xA;echo &quot;Post-build event executed&quot;" />
   </Target>
 
   <ProjectExtensions>

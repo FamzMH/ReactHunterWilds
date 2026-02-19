@@ -14,13 +14,13 @@ internal class SystemTrayInitializer : IInitializer, IDisposable
 
     public Task Init()
     {
-        TrayService.Initialize(
-            "HunterPie",
-            "HunterPie",
-            Icon.ExtractAssociatedIcon(
-                Path.Combine(ClientInfo.ClientPath, "HunterPie.exe")
-            )
-        );
+        //TrayService.Initialize(
+        //    "HunterPie",
+        //    "HunterPie",
+        //    Icon.ExtractAssociatedIcon(
+        //        Path.Combine(ClientInfo.ClientPath, "HunterPie.exe")
+        //    )
+        //);
 
         return Task.CompletedTask;
     }

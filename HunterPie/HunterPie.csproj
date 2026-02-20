@@ -359,7 +359,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy &quot;$(SolutionDir)Localization\localization\*.xml&quot; &quot;$(TargetDir)Languages\&quot; /D /E /I /F /Y&#xD;&#xA;del &quot;$(TargetDir)*.pdb&quot; /q&#xD;&#xA;del &quot;$(TargetDir)ref&quot; /q&#xD;&#xA;rmdir &quot;$(TargetDir)ref&quot;&#xD;&#xA;del &quot;$(TargetDir)*.dev.json&quot; /q&#xD;&#xA;&#xD;&#xA;xcopy $(SolutionDir)\HunterPie\ReactHunter\reacthunter-web\build $(TargetDir)Web /E /Y /I&#xD;&#xA;&#xD;&#xA;ren $(TargetPath) &quot;$(TargetDir)React Hunter Returns.exe&quot; /Y&#xA;&#xD;&#xA;echo &quot;Post-build event executed&quot;" />
+    <Exec Command="xcopy &quot;$(SolutionDir)Localization\localization\*.xml&quot; &quot;$(TargetDir)Languages\&quot; /D /E /I /F /Y&#xD;&#xA;del &quot;$(TargetDir)*.pdb&quot; /q&#xD;&#xA;del &quot;$(TargetDir)ref&quot; /q&#xD;&#xA;rmdir &quot;$(TargetDir)ref&quot;&#xD;&#xA;del &quot;$(TargetDir)*.dev.json&quot; /q&#xD;&#xA;&#xD;&#xA;xcopy $(SolutionDir)\HunterPie\ReactHunter\reacthunter-web\build $(TargetDir)Web /E /Y /I&#xD;&#xA;&#xD;&#xA;move /y &quot;$(TargetDir)$(AssemblyName).exe&quot; &quot;$(TargetDir)React Hunter Returns.exe&quot;&#xA;&#xD;&#xA;echo &quot;Post-build event executed&quot;" />
   </Target>
 
   <ProjectExtensions>

@@ -33,7 +33,6 @@ interface IZoomStyle {
 
 // TODO:
 // - Check Rise support
-// - Refactor to React Hunter Returns
 // - Make UI in WPF instead of WinForms
 // - Remove what we can from MainApplication.OnStartup
 // - Update NPM modules

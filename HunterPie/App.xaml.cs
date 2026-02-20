@@ -3,8 +3,6 @@ using HunterPie.Core.Client.Configuration.Enums;
 using HunterPie.Core.Domain.Dialog;
 using HunterPie.Core.Observability.Logging;
 using HunterPie.DI;
-using HunterPie.Features.Debug.Mocks;
-using HunterPie.Features.Game.Service;
 using HunterPie.Internal;
 using HunterPie.Internal.Tray;
 using HunterPie.Platforms;
@@ -51,17 +49,17 @@ public partial class App : Application
         ShutdownMode = ShutdownMode.OnMainWindowClose;
 
         CheckIfHunterPiePathIsSafe();
-        SetupLanguage();
-        SetupFrameRate();
-        SetupRenderingMode();
+        //SetupLanguage();
+        //SetupFrameRate();
+        //SetupRenderingMode();
         InitializeMainView();
 
-        InitializerManager.InitializeGUI();
+        //InitializerManager.InitializeGUI();
 
-        DependencyContainer.Get<WidgetMocksProvider>()
-            .MockEnabled();
+        //DependencyContainer.Get<WidgetMocksProvider>()
+            //.MockEnabled();
 
-        SetUiThreadPriority();
+        //SetUiThreadPriority();
     }
 
     protected override void OnExit(ExitEventArgs e)

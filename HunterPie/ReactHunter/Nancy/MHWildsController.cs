@@ -6,20 +6,14 @@ using HunterPie.Core.Game.Entity.Party;
 using HunterPie.Core.Game.Entity.Player;
 using HunterPie.Core.Game.Enums;
 using HunterPie.DI;
-using HunterPie.Features.Languages.Repository;
-using HunterPie.Integrations.Datasources.MonsterHunterWilds.Entity.Enemy;
 using HunterPie.Integrations.Datasources.MonsterHunterWilds.Entity.Player;
 using HunterPie.Integrations.Datasources.MonsterHunterWorld.Entity.Player;
-using HunterPie.ReactHunter.Singletons;
-using HunterPie.UI.Architecture.Converters.Localizations;
 using Nancy;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Windows.Navigation;
 
 namespace HunterPie.ReactHunter.Nancy;
 

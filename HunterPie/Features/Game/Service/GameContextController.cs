@@ -1,21 +1,15 @@
 ﻿using HunterPie.Core.Architecture.Events;
-using HunterPie.Core.Client;
 using HunterPie.Core.Domain.Process.Events;
 using HunterPie.Core.Domain.Process.Service;
 using HunterPie.Core.Game;
 using HunterPie.Core.Observability.Logging;
 using HunterPie.Core.Utils;
-using HunterPie.Features.Backup.Services;
-using HunterPie.Features.Overlay.Services;
-using HunterPie.Features.Overlay.Widgets;
 using HunterPie.Features.Scan.Service;
-using HunterPie.Integrations.Discord.Factory;
 using HunterPie.Integrations.Services;
 using HunterPie.ReactHunter.Nancy;
 using System;
 using System.Threading;
 using System.Windows;
-using System.Windows.Threading;
 
 namespace HunterPie.Features.Game.Service;
 

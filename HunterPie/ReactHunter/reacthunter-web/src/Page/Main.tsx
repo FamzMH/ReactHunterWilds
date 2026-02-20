@@ -34,7 +34,6 @@ interface IZoomStyle {
 // TODO:
 // - Check Rise support
 // - Make UI in WPF instead of WinForms
-// - Remove what we can from MainApplication.OnStartup
 // - Update NPM modules
 
 export default class Main extends React.Component<IProps, IState>{

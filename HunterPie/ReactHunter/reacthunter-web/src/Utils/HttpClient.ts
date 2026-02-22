@@ -1,4 +1,3 @@
-import Config from '../Config';
 import axios,{AxiosRequestConfig,AxiosResponse,AxiosError} from 'axios';
 
 axios.defaults.withCredentials = true;

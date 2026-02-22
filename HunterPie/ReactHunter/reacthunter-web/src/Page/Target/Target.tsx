@@ -74,13 +74,13 @@ export function getTarget(main: Main) {
 }
 
 function showCrown(data: any) {
-    if (data.crown == 1) {
+    if (data.crown === 1) {
         return (<Icon type="trophy" theme="twoTone" twoToneColor="darkgray" />)
     }
-    else if (data.crown == 2) {
+    else if (data.crown === 2) {
         return (<Icon type="trophy" theme="twoTone" twoToneColor="darkgoldenrod" />)
     }
-    else if (data.crown == 3) {
+    else if (data.crown === 3) {
         return (<Icon type="smile" theme="twoTone" twoToneColor="darkgoldenrod" />)
     }
 }
@@ -166,7 +166,7 @@ function getMonsterParts(monster: any, localizations: { [p: string]: string; }) 
             partHealthFraction = part.health / part.maxHealth;
         } else if (part.type === PartType.Severable) {
             partHealthFraction = part.sever / part.maxSever;
-            if (partHealthFraction == 1) {
+            if (partHealthFraction === 1) {
                 // When a severable part is already severed HunterPie
                 // returns its health as 100%.
                 return null;

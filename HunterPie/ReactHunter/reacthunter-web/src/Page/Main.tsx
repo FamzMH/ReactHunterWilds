@@ -4,7 +4,6 @@ import * as Api from './MainService';
 import './Main.css'
 import Config from '../Config';
 import {getTarget} from './Target/Target';
-import {getMinutes, getSeconds} from "./Timer/Timer";
 import {getTeam} from "./Team/Team";
 import {getAbnormalities} from "./Player/Player";
 
@@ -153,6 +152,7 @@ export default class Main extends React.Component<IProps, IState>{
                 backgroundPosition: 'center',
                 backgroundSize: 'cover',
                 backgroundRepeat: 'no-repeat',
+                backgroundColor: "rgb(81, 81, 81)",
                 width: '100vw',
             }}>
                 <Content style={{ padding: '10px', height: "100%" }}>

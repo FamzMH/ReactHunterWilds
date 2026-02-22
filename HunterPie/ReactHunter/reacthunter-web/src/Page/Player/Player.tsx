@@ -1,4 +1,3 @@
-import {getMinutes, getSeconds} from "../Timer/Timer";
 import React from "react";
 import Main from "../Main";
 import {Card, Divider, Progress} from "antd";
@@ -95,6 +94,8 @@ export function getAbnormalities(main: Main) {
                 </Card.Grid>
             );
         }
+
+        return null;
     });
 
     const debuffsRender = abnormalities.filter((a) => {
@@ -121,6 +122,8 @@ export function getAbnormalities(main: Main) {
                 </Card.Grid>
             );
         }
+
+        return null;
     });
 
     return (

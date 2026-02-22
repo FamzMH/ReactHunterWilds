@@ -33,8 +33,6 @@ interface IZoomStyle {
 
 // TODO:
 // - Check Rise support
-// - Make UI in WPF instead of WinForms
-// - Update NPM modules
 
 export default class Main extends React.Component<IProps, IState>{
     Interval: NodeJS.Timeout | undefined;

@@ -31,7 +31,6 @@ public class MHWildsController : NancyModule
         Get("/get", x => {
             IContext context = Singletons.Context.HunterPieContext;
 
-            // TODO: Can we use context.Game.TargetDetectionService.Target?
             IMonster? target = GetTarget(context);
 
             int timeLeft = 0;
@@ -80,7 +79,7 @@ public class MHWildsController : NancyModule
 
         try
         {
-            monster = context.Game.Monsters.Where(monster => monster.Target == Core.Game.Enums.Target.Self).First();
+            monster = context.Game.Monsters.Where(monster => monster.Target == Target.Self).First();
         }
         catch (Exception)
         {

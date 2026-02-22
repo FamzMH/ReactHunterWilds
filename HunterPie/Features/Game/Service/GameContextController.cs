@@ -10,10 +10,12 @@ using HunterPie.ReactHunter.Nancy;
 using System;
 using System.Threading;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace HunterPie.Features.Game.Service;
 
 internal class GameContextController(
+    Dispatcher uiDispatcher,
     IProcessWatcherService processWatcherService,
     IGameContextService gameContextService,
     IControllableScanService controllableScanService) : IDisposable
@@ -22,6 +24,7 @@ internal class GameContextController(
 
     private bool _isDisposed;
     private Context? _context;
+    private readonly Dispatcher _uiDispatcher = uiDispatcher;
     private readonly IProcessWatcherService _processWatcherService = processWatcherService;
     private readonly IGameContextService _gameContextService = gameContextService;
     private readonly IControllableScanService _controllableScanService = controllableScanService;
@@ -65,7 +68,9 @@ internal class GameContextController(
         SmartEventsTracker.DisposeEvents();
         ContextInitializers.Dispose();
 
-        Application.Current.Shutdown();
+        App.Form?.Close();
+
+        _uiDispatcher.Invoke(Application.Current.Shutdown);
     }
 
     public void Dispose()

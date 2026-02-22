@@ -32,6 +32,7 @@ public partial class App : Application
 
     private static MainView Window => DependencyContainer.Get<MainView>();
     private static MainApplication MainApplication => DependencyContainer.Get<MainApplication>();
+    public static Form1? Form;
 
     protected override async void OnStartup(StartupEventArgs e)
     {
@@ -118,12 +119,12 @@ public partial class App : Application
     {
         await MainApplication.Start();
 
-        var form = new Form1(Current);
+        Form = new Form1(Current);
         var wih = new WindowInteropHelper(Window)
         {
-            Owner = form.Handle
+            Owner = Form.Handle
         };
-        form.ShowDialog();
+        Form.ShowDialog();
     }
 
     private void CheckForRunningInstances()

@@ -23,7 +23,7 @@ export function getAbnormalities(main: Main) {
     const toolsLocalizations = main.state.apiData.localizations.tools as { [p: string]: string; };
 
     let toolsRender = tools.map((tool: any) => {
-        const toolName = toolsLocalizations[tool.id];
+        let toolName = toolsLocalizations[tool.id];
 
         let percent;
         let format: any;
@@ -36,6 +36,7 @@ export function getAbnormalities(main: Main) {
             percent = (tool.cooldown / tool.maxCooldown) * 100;
             format = <span style={{color: "white"}}>{Math.floor(tool.cooldown)}s</span>
             strokeColor = MonsterBarColor;
+            toolName = toolName + " (cooldown)"
         } else {
             return null
         }

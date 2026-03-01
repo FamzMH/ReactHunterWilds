@@ -161,6 +161,10 @@ function getMonsterParts(monster: any, localizations: { [p: string]: string; }) 
         let timesBrokenCount = 0;
         let partHealthFraction = 0;
 
+        if (seen.includes(part.id)) {
+            return null;
+        }
+
         if (part.type === PartType.Breakable) {
             timesBrokenCount = part.count;
             partHealthFraction = part.health / part.maxHealth;
